@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>補助金インテリジェンス Agent — デモ資料</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+    body { font-family: 'Noto Sans JP', sans-serif; }
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-bottom: 4px solid #e5e7eb;
+    }
+    .mermaid { margin: 0 auto; }
+    .badge-high   { background: #fee2e2; color: #991b1b; }
+    .badge-medium { background: #fef3c7; color: #92400e; }
+    .badge-low    { background: #d1fae5; color: #065f46; }
+    code { font-family: 'Courier New', monospace; font-size: 0.85em; }
+    pre code { display: block; overflow-x: auto; }
+    .diff-add { background: #d1fae5; }
+    .diff-del { background: #fee2e2; }
+    .arrow-flow { font-size: 1.5rem; color: #6366f1; }
+    /* スライドナビゲーション */
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; background: #d1d5db; cursor: pointer; }
+    .nav-dot.active { background: #4f46e5; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- ナビゲーション -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-2">
+    <span class="text-lg font-bold text-indigo-700">⚡ 補助金インテリジェンス Agent</span>
+    <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">PoC v0.1</span>
+  </div>
+  <div class="text-sm text-gray-500">インハウスマーケ向け AIツール — ポートフォリオ</div>
+</nav>
+
+<div class="pt-14">
+
+<!-- ===== SLIDE 1: タイトル ===== -->
+<section class="slide bg-gradient-to-br from-indigo-900 via-indigo-800 to-violet-900 text-white px-8 py-16">
+  <div class="max-w-4xl mx-auto text-center">
+    <p class="text-indigo-300 text-sm font-medium tracking-widest uppercase mb-4">Portfolio Project — Energy Supply 応募向け</p>
+    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+      補助金・制度インテリジェンス Agent<br>
+      <span class="text-indigo-300 text-3xl">鮮度監視 ＋ 更新差分提案</span>
+    </h1>
+    <p class="text-indigo-200 text-lg mb-10 max-w-2xl mx-auto">
+      再エネ・電力・脱炭素領域の補助金ページ変更を自動検知し、<br>
+      LP・SEO・広告訴求の修正案を差分付きで提案するAIツール
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 text-sm">
+      <span class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-4 py-2">🐍 Python 3.11</span>
+      <span class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-4 py-2">🤖 Claude API</span>
+      <span class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-4 py-2">🗄 SQLite</span>
+      <span class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-4 py-2">📄 Markdown Output</span>
+      <span class="bg-white/10 backdrop-blur border border-white/20 rounded-lg px-4 py-2">✅ 93 Tests Passing</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 2: 課題 ===== -->
+<section class="slide bg-white px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Problem</p>
+    <h2 class="text-3xl font-bold mb-10">なぜこのツールが必要か？</h2>
+
+    <div class="grid md:grid-cols-2 gap-8 mb-10">
+      <!-- Left: 課題 -->
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-6">
+        <h3 class="font-bold text-red-800 text-lg mb-4">😰 現状の人力運用</h3>
+        <ul class="space-y-3 text-sm">
+          <li class="flex gap-3">
+            <span class="text-red-500 mt-0.5">✗</span>
+            <div>
+              <strong>更新漏れ</strong><br>
+              <span class="text-gray-600">補助金の期限・金額・対象条件が古いまま広告・LPで訴求し続ける</span>
+            </div>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-red-500 mt-0.5">✗</span>
+            <div>
+              <strong>検知の遅延</strong><br>
+              <span class="text-gray-600">「気づいたら締切が変わっていた」→ 広告費のムダ、機会損失</span>
+            </div>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-red-500 mt-0.5">✗</span>
+            <div>
+              <strong>修正作業の属人化</strong><br>
+              <span class="text-gray-600">誰が・どのページの・どこを直すかが曖昧、対応スピードが遅い</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right: 影響 -->
+      <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+        <h3 class="font-bold text-gray-800 text-lg mb-4">📉 ビジネスへの影響</h3>
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-10 bg-red-400 rounded-full"></div>
+            <div>
+              <div class="font-semibold text-sm">CVR 低下</div>
+              <div class="text-xs text-gray-500">古い制度情報でユーザーの信頼を失う</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-10 bg-orange-400 rounded-full"></div>
+            <div>
+              <div class="font-semibold text-sm">CPA 悪化</div>
+              <div class="text-xs text-gray-500">終了した補助金で広告を配信し続ける</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-10 bg-yellow-400 rounded-full"></div>
+            <div>
+              <div class="font-semibold text-sm">制作工数の浪費</div>
+              <div class="text-xs text-gray-500">情報収集〜修正案作成に数時間かかる</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 電力・再エネ領域特有の文脈 -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
+      <p class="text-sm text-indigo-800">
+        <strong>再エネ・電力・脱炭素領域の特殊事情：</strong>
+        補助金・制度・申請期間・要件変更の頻度が高く、LP/記事/広告訴求の「鮮度」がCVと信頼性に直結する。
+        国の政策目標（2030年 ZEH標準化等）により毎年制度が大きく変わる。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 3: ソリューション概要 ===== -->
+<section class="slide bg-gradient-to-br from-gray-50 to-indigo-50 px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Solution</p>
+    <h2 class="text-3xl font-bold mb-3">このツールが実現すること</h2>
+    <p class="text-gray-500 mb-10">検知 → 分析 → 提案 の 3ステップを自動化</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="text-3xl mb-3">🔍</div>
+        <h3 class="font-bold text-lg mb-2">① 自動検知</h3>
+        <p class="text-sm text-gray-600">
+          YAML で指定した補助金ページを定期クロール。
+          前回スナップショットとの差分を段落単位で検出。
+          <strong>金額・日付・重要語に重み付け</strong>してfalse positiveを抑制。
+        </p>
+        <div class="mt-3 text-xs bg-indigo-50 text-indigo-700 rounded-lg px-3 py-2">
+          数時間→数分 で変更を把握
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="text-3xl mb-3">🏷️</div>
+        <h3 class="font-bold text-lg mb-2">② 変更分類</h3>
+        <p class="text-sm text-gray-600">
+          変更タイプを自動判定。
+          <span class="badge-high px-1 rounded text-xs font-medium">締切変更</span>
+          <span class="badge-high px-1 rounded text-xs font-medium">金額改定</span>
+          <span class="badge-medium px-1 rounded text-xs font-medium">対象変更</span>
+          <span class="badge-low px-1 rounded text-xs font-medium">手続き変更</span> など。
+          重要度（Severity）を3段階で自動スコアリング。
+        </p>
+        <div class="mt-3 text-xs bg-red-50 text-red-700 rounded-lg px-3 py-2">
+          🔴 HIGH は即時アラート
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div class="text-3xl mb-3">✍️</div>
+        <h3 class="font-bold text-lg mb-2">③ 修正案生成</h3>
+        <p class="text-sm text-gray-600">
+          Claude API が差分を読み取り、
+          <strong>自社LP修正文案</strong>と
+          <strong>広告訴求案（RSA形式）</strong>を自動生成。
+          確認ポイントも列挙。根拠差分を常に引用。
+        </p>
+        <div class="mt-3 text-xs bg-green-50 text-green-700 rounded-lg px-3 py-2">
+          制作工数を大幅削減
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex flex-wrap gap-6 items-center justify-center text-center text-sm">
+        <div>
+          <div class="text-2xl font-bold text-indigo-700">数時間</div>
+          <div class="text-gray-500">→ 数分</div>
+          <div class="text-xs text-gray-400">更新検知所要時間</div>
+        </div>
+        <div class="text-2xl text-gray-300">→</div>
+        <div>
+          <div class="text-2xl font-bold text-indigo-700">0件</div>
+          <div class="text-gray-500">更新漏れ</div>
+          <div class="text-xs text-gray-400">重要ページの期限・金額</div>
+        </div>
+        <div class="text-2xl text-gray-300">→</div>
+        <div>
+          <div class="text-2xl font-bold text-indigo-700">即日</div>
+          <div class="text-gray-500">修正案を出力</div>
+          <div class="text-xs text-gray-400">LP文案＋広告訴求案</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 4: システムアーキテクチャ図 ===== -->
+<section class="slide bg-white px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Architecture</p>
+    <h2 class="text-3xl font-bold mb-2">システム構成図</h2>
+    <p class="text-gray-500 text-sm mb-8">7つのコンポーネントがパイプラインを形成</p>
+
+    <div class="mermaid text-sm">
+flowchart TD
+    A["📋 sources.yml\n監視対象URL定義"] --> B
+
+    subgraph PIPELINE["⚙️ 処理パイプライン（app/）"]
+        B["🌐 Fetcher\nHTTP取得 + リトライ"] --> C
+        C["🧹 Extractor\nreadability / CSSセレクタ\n本文抽出 + 正規化"] --> D
+        D["🗄 Store\nSQLite + gzip\nスナップショット管理"] --> E
+        E["🔍 Diff Engine\n段落単位差分\n金額・日付・重要語に重み"]
+        E --> F
+        E --> G
+        F["🏷️ Classifier\nルールベース変更分類\ndeadline / amount / program_end..."]
+        G["🤖 Generator\nClaude API\nLP修正案 + 広告案 + 確認ポイント"]
+    end
+
+    F --> H
+    G --> H
+    H["📄 Reporter\nMarkdown digest.md\n差分 + 分類 + AI提案を統合"]
+
+    style A fill:#e0e7ff,stroke:#4f46e5
+    style H fill:#d1fae5,stroke:#059669
+    style PIPELINE fill:#f8fafc,stroke:#e5e7eb
+    style G fill:#fef3c7,stroke:#d97706
+    style F fill:#ede9fe,stroke:#7c3aed
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 5: データフロー詳細 ===== -->
+<section class="slide bg-gradient-to-br from-gray-50 to-slate-100 px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Data Flow</p>
+    <h2 class="text-3xl font-bold mb-2">データフロー詳細</h2>
+    <p class="text-gray-500 text-sm mb-8">実行のたびに前回との比較を行い、変化のあった部分だけを処理する</p>
+
+    <div class="mermaid text-sm">
+sequenceDiagram
+    actor U as マーケ担当者
+    participant S as sources.yml
+    participant F as Fetcher
+    participant E as Extractor
+    participant DB as SQLite Store
+    participant D as Diff Engine
+    participant C as Classifier
+    participant G as Claude API
+    participant R as Reporter
+
+    U->>S: 監視URLを登録
+    Note over S: fetch_interval_hours: 24<br/>severity_rules: [申請|締切]→high
+
+    loop 定期実行（cron or CLI）
+        S->>F: URLリストを渡す
+        F->>F: HTTPリクエスト（リトライ×2）
+        F->>E: raw HTML
+
+        E->>E: readability で本文抽出<br/>正規化（空白・改行整形）
+        E->>DB: テキストを保存（gzip）
+
+        DB->>D: 前回スナップショット（t-1）<br/>今回スナップショット（t）
+        D->>D: 段落単位 SequenceMatcher<br/>金額/日付/重要語にフラグ
+
+        alt 変更あり
+            D->>C: diff_chunks
+            C->>C: ルールベース分類<br/>severity 判定
+            D->>G: diff_excerpt + source_meta
+            G->>G: Claude opus-4-6<br/>LP文案 + RSA広告案 生成
+            G->>R: suggestions
+            C->>R: classification
+        end
+
+        R->>R: Markdown digest.md 生成
+        R->>U: reports/YYYY-MM-DD_digest.md
+    end
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 6: 変更分類ロジック ===== -->
+<section class="slide bg-white px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Classification Logic</p>
+    <h2 class="text-3xl font-bold mb-2">変更タイプ分類・Severity 判定ロジック</h2>
+    <p class="text-gray-500 text-sm mb-8">ルールベースで高速分類し、false positiveを抑制</p>
+
+    <div class="mermaid text-sm">
+flowchart TD
+    START(["差分チャンク受け取り"]) --> CHECK_EMPTY{チャンク\nあり？}
+    CHECK_EMPTY -- No --> OTHER["変更タイプ: other"]
+    CHECK_EMPTY -- Yes --> R1
+
+    R1{"公募終了ワード\n終了しました / 廃止 / 受付を終了"} -- Match --> PROGRAM_END["🔴 program_end"]
+    R1 -- No Match --> R2
+
+    R2{"新設ワード\n新設 / 募集開始 / 公募開始"} -- Match --> NEW_PROG["🟢 new_program"]
+    R2 -- No Match --> R3
+
+    R3{"期限ワード\n締切 / 受付期間 / 繰り上げ"} -- Match --> DEADLINE["🔴 deadline_change"]
+    R3 -- No Match --> R4
+
+    R4{"対象外ワード\n対象外 / 対象要件 / 資格要件"} -- Match --> ELIG1["🟡 eligibility_change"]
+    R4 -- No Match --> R5
+
+    R5{"金額ワード\n万円 / 補助率 / 上限額"} -- Match --> AMOUNT["🔴 amount_change"]
+    R5 -- No Match --> R6
+
+    R6{"手続きワード\n書類 / 様式 / 申請方法"} -- Match --> PROC["🟡 procedure_change"]
+    R6 -- No Match --> R7
+
+    R7{"広義対象ワード\n対象 / 要件 / 条件"} -- Match --> ELIG2["🟡 eligibility_change"]
+    R7 -- No Match --> OTHER2["other"]
+
+    PROGRAM_END & DEADLINE & AMOUNT --> SEV_HIGH["Severity: 🔴 HIGH\n即時アラート対象"]
+    ELIG1 & ELIG2 & PROC --> SEV_CHECK{カスタム\nルール or\n重要語?}
+    SEV_CHECK -- Yes --> SEV_HIGH
+    SEV_CHECK -- No --> SEV_MED["Severity: 🟡 MEDIUM\n日次レポートに記載"]
+    NEW_PROG & OTHER & OTHER2 --> SEV_LOW["Severity: 🟢 LOW\n日次レポートに記載"]
+
+    style SEV_HIGH fill:#fee2e2,stroke:#dc2626
+    style PROGRAM_END fill:#fee2e2,stroke:#dc2626
+    style DEADLINE fill:#fee2e2,stroke:#dc2626
+    style AMOUNT fill:#fee2e2,stroke:#dc2626
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 7: デモ：差分検知と出力 ===== -->
+<section class="slide bg-gradient-to-br from-gray-50 to-indigo-50 px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Demo Output</p>
+    <h2 class="text-3xl font-bold mb-2">実際の出力イメージ</h2>
+    <p class="text-gray-500 text-sm mb-8">before.html → after.html の変更検知結果（実行済みサンプル）</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- 差分 -->
+      <div>
+        <h3 class="font-bold mb-3 flex items-center gap-2">
+          <span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">差分検知</span>
+          変更箇所の自動ハイライト
+        </h3>
+        <div class="bg-gray-900 text-gray-100 rounded-xl p-4 font-mono text-xs leading-relaxed">
+          <div class="diff-del px-2 py-0.5 rounded mb-1 text-red-400">- 対象：中小企業および個人事業主</div>
+          <div class="diff-add px-2 py-0.5 rounded mb-1 text-green-400">+ 対象：中小企業（個人事業主は対象外）</div>
+          <div class="mb-1"></div>
+          <div class="diff-del px-2 py-0.5 rounded mb-1 text-red-400">- 補助率：導入費用の1/2以内</div>
+          <div class="diff-add px-2 py-0.5 rounded mb-1 text-green-400">+ 補助率：導入費用の1/3以内（変更）</div>
+          <div class="mb-1"></div>
+          <div class="diff-del px-2 py-0.5 rounded mb-1 text-red-400">- 補助上限額：300万円</div>
+          <div class="diff-add px-2 py-0.5 rounded mb-1 text-green-400">+ 補助上限額：200万円（引き下げ）</div>
+          <div class="mb-1"></div>
+          <div class="diff-del px-2 py-0.5 rounded mb-1 text-red-400">- 締切：2025年9月30日</div>
+          <div class="diff-add px-2 py-0.5 rounded mb-1 text-green-400">+ 締切：2025年7月31日（繰り上げ）</div>
+        </div>
+        <div class="mt-3 flex gap-2 text-xs">
+          <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">🔴 deadline_change</span>
+          <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">Severity: HIGH</span>
+        </div>
+      </div>
+
+      <!-- AI 修正案 -->
+      <div>
+        <h3 class="font-bold mb-3 flex items-center gap-2">
+          <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">Claude 生成</span>
+          マーケ即使用可能な修正案
+        </h3>
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-xs leading-relaxed space-y-3">
+          <div>
+            <div class="font-bold text-gray-700 mb-1">📝 LP修正文案</div>
+            <div class="bg-amber-50 rounded p-2 text-gray-700">
+              ⚠️ 重要：2025年4月1日付で制度内容が改定<br>
+              ■ 対象：中小企業のみ（個人事業主は対象外）<br>
+              ■ 補助率：1/3以内（旧：1/2）、上限：200万円<br>
+              ■ 締切：2025年7月31日必着
+            </div>
+          </div>
+          <div>
+            <div class="font-bold text-gray-700 mb-1">📢 RSA広告案</div>
+            <div class="space-y-1 text-gray-700">
+              <div class="bg-blue-50 rounded px-2 py-1">見出し：再エネ補助金7月末締切</div>
+              <div class="bg-blue-50 rounded px-2 py-1">見出し：補助上限200万円に改定</div>
+              <div class="bg-blue-50 rounded px-2 py-1">説明文：締切繰り上げ・対象縮小。中小企業の方はお早めに確認を</div>
+            </div>
+          </div>
+          <div>
+            <div class="font-bold text-gray-700 mb-1">✅ 確認ポイント</div>
+            <ul class="text-gray-600 space-y-0.5 pl-3">
+              <li>□ 自社が「中小企業」の定義に該当するか</li>
+              <li>□ 7月31日必着の具体的ルール</li>
+              <li>□ 予算残額・受付状況</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- レポートファイルの説明 -->
+    <div class="mt-8 bg-white border border-gray-200 rounded-xl p-5">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="text-2xl">📄</span>
+        <h3 class="font-bold">出力ファイル：<code class="bg-gray-100 px-2 py-0.5 rounded">reports/2025-04-01_digest.md</code></h3>
+      </div>
+      <p class="text-sm text-gray-600">
+        変更の有無・差分・AI修正案・確認ポイントをすべて1ファイルに統合。
+        マーケチームが開いてそのまま確認・コピペできる形式で出力。
+        承認後に担当者が本番ページへ反映（誤情報リスクを防ぐ人間承認ステップ）。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 8: 運用フロー ===== -->
+<section class="slide bg-white px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Operation</p>
+    <h2 class="text-3xl font-bold mb-2">運用フロー</h2>
+    <p class="text-gray-500 text-sm mb-8">セットアップから日常運用まで</p>
+
+    <div class="mermaid text-sm">
+flowchart LR
+    subgraph SETUP["🛠 初期設定（1回）"]
+        S1["sources.yml に\n監視URLを登録"] --> S2["python demo.py で\n動作確認"]
+    end
+
+    subgraph DAILY["🔄 日次運用（自動）"]
+        D1["定期実行\npython -m app.run"] --> D2{変更\nあり？}
+        D2 -- No --> D3["変更なし\nログ記録のみ"]
+        D2 -- Yes --> D4["Severity判定"]
+        D4 --> D5["reports/\nYYYY-MM-DD_digest.md\n自動生成"]
+    end
+
+    subgraph REVIEW["👀 人間レビュー（毎朝）"]
+        R1["digest.md を確認"] --> R2{要対応？}
+        R2 -- No --> R3["スキップ"]
+        R2 -- Yes --> R4["AI修正案を\n参考に内容確認"] --> R5["LP/SEO/広告を\n本番反映"]
+    end
+
+    SETUP --> DAILY
+    DAILY --> REVIEW
+
+    style SETUP fill:#ede9fe,stroke:#7c3aed
+    style DAILY fill:#e0e7ff,stroke:#4f46e5
+    style REVIEW fill:#d1fae5,stroke:#059669
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4 mt-8 text-sm">
+      <div class="bg-violet-50 border border-violet-200 rounded-xl p-4">
+        <div class="font-bold text-violet-700 mb-2">🛠 初期設定</div>
+        <code class="text-xs block bg-white rounded p-2">
+          cp .env.example .env<br>
+          # API キー設定<br>
+          vi config/sources.yml<br>
+          python demo.py
+        </code>
+      </div>
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+        <div class="font-bold text-indigo-700 mb-2">🔄 日次実行</div>
+        <code class="text-xs block bg-white rounded p-2">
+          # CLI手動実行<br>
+          python -m app.run<br><br>
+          # cron自動化<br>
+          0 8 * * * python -m app.run
+        </code>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+        <div class="font-bold text-green-700 mb-2">📄 確認</div>
+        <code class="text-xs block bg-white rounded p-2">
+          # 出力確認<br>
+          open reports/<br>
+          # 最新レポートを確認<br>
+          cat reports/YYYY-MM-DD_digest.md
+        </code>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 9: テスト品質 ===== -->
+<section class="slide bg-gradient-to-br from-gray-50 to-green-50 px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Quality</p>
+    <h2 class="text-3xl font-bold mb-2">テスト品質</h2>
+    <p class="text-gray-500 text-sm mb-8">実データに近いフィクスチャで成果物のクオリティを検証</p>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <div>
+        <div class="bg-green-900 text-green-100 rounded-xl p-4 font-mono text-xs leading-relaxed mb-4">
+          <div class="text-green-400 mb-2">$ pytest tests/ -v</div>
+          <div class="text-gray-400">collected 93 items</div>
+          <div class="mt-2 space-y-0.5">
+            <div><span class="text-green-400">PASSED</span> test_quality_extractor.py::TestSIIBatteryExtraction::test_extracts_subsidy_amount</div>
+            <div><span class="text-green-400">PASSED</span> test_quality_diff.py::TestZEHDiff::test_amount_change_detected</div>
+            <div><span class="text-green-400">PASSED</span> test_quality_classifier.py::TestRealScenarioClassification::test_sii_battery_severity_is_high</div>
+            <div><span class="text-green-400">PASSED</span> test_quality_pipeline.py::TestEndToEndPipeline::test_full_pipeline_before_to_after</div>
+            <div class="mt-2">...</div>
+          </div>
+          <div class="mt-3 text-green-300 font-bold">93 passed in 0.26s ✅</div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-sm">抽出品質テスト</span>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">18件 PASS</span>
+          </div>
+          <p class="text-xs text-gray-500">SII蓄電池・ZEH・新設プログラムの実データ構造で金額・日付・要件が正確に抽出されるか検証</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-sm">差分精度テスト</span>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">21件 PASS</span>
+          </div>
+          <p class="text-xs text-gray-500">公募終了・補助額改定・締切繰り上げなど実シナリオで正しく差分検知できるか検証</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-sm">分類精度テスト</span>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">21件 PASS</span>
+          </div>
+          <p class="text-xs text-gray-500">全変更タイプ・severity の分類精度をキーワード別に網羅検証</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-semibold text-sm">E2Eパイプラインテスト</span>
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">16件 PASS</span>
+          </div>
+          <p class="text-xs text-gray-500">fetcher→store→diff→classify→report の完全パイプラインを Claude API なしで検証</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 10: 拡張ロードマップ ===== -->
+<section class="slide bg-white px-8 py-16">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Roadmap</p>
+    <h2 class="text-3xl font-bold mb-2">拡張ロードマップ</h2>
+    <p class="text-gray-500 text-sm mb-8">MVP を起点にループを段階的に閉じていく</p>
+
+    <div class="mermaid text-sm">
+gantt
+    dateFormat YYYY-MM
+    section MVP（完成済み）
+    監視・差分・分類・Markdown出力   :done, 2025-03, 2025-03
+    93テスト・品質担保               :done, 2025-03, 2025-03
+    section Phase 2（短期）
+    RAG化：自社サイト自動参照        :2025-04, 2025-05
+    Notion連携：修正タスク自動起票   :2025-04, 2025-05
+    GitHub Actions cron自動化        :2025-04, 2025-04
+    section Phase 3（中期）
+    競合サイト監視（小規模・規約内） :2025-06, 2025-07
+    多商材テンプレ最適化             :2025-06, 2025-08
+    ダッシュボード（更新履歴可視化） :2025-07, 2025-09
+    </div>
+  </div>
+</section>
+
+<!-- ===== SLIDE 11: まとめ ===== -->
+<section class="slide bg-gradient-to-br from-indigo-900 via-indigo-800 to-violet-900 text-white px-8 py-16">
+  <div class="max-w-4xl mx-auto text-center">
+    <p class="text-indigo-300 text-sm font-medium tracking-widest uppercase mb-4">Summary</p>
+    <h2 class="text-4xl font-bold mb-8">1分でまとめると</h2>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-12">
+      <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6">
+        <div class="text-3xl mb-3">🛡</div>
+        <h3 class="font-bold text-lg mb-2">更新漏れをゼロに</h3>
+        <p class="text-indigo-200 text-sm">補助金の期限・金額・対象条件の変更を自動検知し、古い情報での広告配信・LP表示を防止</p>
+      </div>
+      <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6">
+        <div class="text-3xl mb-3">⚡</div>
+        <h3 class="font-bold text-lg mb-2">制作工数を削る</h3>
+        <p class="text-indigo-200 text-sm">Claude が差分からLP修正文案・RSA広告案・確認ポイントを自動生成。調査→執筆の時間を大幅短縮</p>
+      </div>
+      <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6">
+        <div class="text-3xl mb-3">📈</div>
+        <h3 class="font-bold text-lg mb-2">広告訴求の鮮度を上げる</h3>
+        <p class="text-indigo-200 text-sm">情報の新鮮さがCVRとCPAに直結する再エネ領域で、変更検知から修正案まで即日対応を実現</p>
+      </div>
+    </div>
+
+    <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-6 text-left max-w-2xl mx-auto">
+      <p class="text-indigo-200 text-sm font-mono">
+        # デモを実行する<br>
+        <span class="text-green-300">$ python demo.py</span><br><br>
+        # テストを実行する<br>
+        <span class="text-green-300">$ pytest tests/ -v</span><br>
+        <span class="text-indigo-300">→ 93 passed ✅</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+</div><!-- end pt-14 -->
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'neutral',
+    themeVariables: {
+      primaryColor: '#e0e7ff',
+      primaryTextColor: '#1e1b4b',
+      primaryBorderColor: '#4f46e5',
+      lineColor: '#6366f1',
+      secondaryColor: '#f0fdf4',
+      tertiaryColor: '#fef3c7',
+    },
+    flowchart: { curve: 'basis', htmlLabels: true },
+    sequence: { actorMargin: 60 },
+  });
+</script>
+</body>
+</html>
