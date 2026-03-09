@@ -557,25 +557,28 @@ flowchart LR
 
 <!-- ===== SLIDE 10: 拡張ロードマップ ===== -->
 <section class="slide bg-white px-8 py-16">
-  <div class="max-w-5xl mx-auto">
+  <div class="max-w-7xl mx-auto">
     <p class="text-indigo-600 font-semibold text-sm uppercase tracking-widest mb-2">Roadmap</p>
     <h2 class="text-3xl font-bold mb-2">拡張ロードマップ</h2>
     <p class="text-gray-500 text-sm mb-8">MVP を起点にループを段階的に閉じていく</p>
 
-    <div class="mermaid text-sm">
+    <div style="overflow-x:auto; width:100%;">
+      <div class="mermaid" id="gantt-chart" style="min-width:900px;">
 gantt
     dateFormat YYYY-MM
-    section MVP（完成済み）
-    監視・差分・分類・Markdown出力   :done, 2025-03, 2025-03
-    93テスト・品質担保               :done, 2025-03, 2025-03
-    section Phase 2（短期）
-    RAG化：自社サイト自動参照        :2025-04, 2025-05
-    Notion連携：修正タスク自動起票   :2025-04, 2025-05
-    GitHub Actions cron自動化        :2025-04, 2025-04
-    section Phase 3（中期）
-    競合サイト監視（小規模・規約内） :2025-06, 2025-07
-    多商材テンプレ最適化             :2025-06, 2025-08
-    ダッシュボード（更新履歴可視化） :2025-07, 2025-09
+    axisFormat %Y/%m
+    section ✅ MVP（完成済み）
+    監視・差分・分類・MD出力     :done, mvp1, 2026-03, 2026-04
+    93テスト・品質担保           :done, mvp2, 2026-03, 2026-04
+    section 🚀 Phase 2 （1〜2ヶ月）
+    RAG化：自社サイト自動参照    :p2a, 2026-04, 2026-06
+    Notion連携：タスク自動起票   :p2b, 2026-04, 2026-06
+    GitHub Actions cron自動化    :p2c, 2026-04, 2026-05
+    section 📈 Phase 3 （3〜6ヶ月）
+    競合サイト監視（規約内）     :p3a, 2026-06, 2026-08
+    多商材テンプレ最適化         :p3b, 2026-06, 2026-09
+    ダッシュボード（履歴可視化） :p3c, 2026-07, 2026-10
+      </div>
     </div>
   </div>
 </section>
@@ -632,6 +635,7 @@ gantt
     },
     flowchart: { curve: 'basis', htmlLabels: true },
     sequence: { actorMargin: 60 },
+    gantt: { useMaxWidth: false, barHeight: 28, barGap: 6, topPadding: 50, fontSize: 14 },
   });
 </script>
 </body>
