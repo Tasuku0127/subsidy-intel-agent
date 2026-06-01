@@ -1,0 +1,46 @@
+version: 1
+defaults:
+  fetch_interval_hours: 24
+  timeout_seconds: 25
+  user_agent: "EnergySupplySubsidyWatcher/0.1"
+  extract_mode: "readability"
+
+sources:
+  # ---- 自社ページ（デモ用：実在する補助金関連ページで代替） ----
+  - id: "meti_solarpower"
+    name: "経産省：太陽光発電補助金関連"
+    url: "https://www.enecho.meti.go.jp/category/saving_and_new/saiene/solar/"
+    owner_team: "marketing"
+    tags: ["official", "national", "solar", "subsidy"]
+    fetch_interval_hours: 24
+    severity_rules:
+      - match: "(申請|受付|締切|期限|募集|公募)"
+        severity: "high"
+      - match: "(万円|億円|上限|補助率)"
+        severity: "high"
+      - match: "(対象|要件|条件)"
+        severity: "medium"
+
+  # ---- 公式ページサンプル ----
+  - id: "env_subsidy_top"
+    name: "環境省：脱炭素補助金（トップ）"
+    url: "https://www.env.go.jp/policy/zerocarbon.html"
+    owner_team: "marketing"
+    tags: ["official", "national", "carbon_neutral", "subsidy"]
+    fetch_interval_hours: 24
+    severity_rules:
+      - match: "(申請|締切|公募|終了|終了日)"
+        severity: "high"
+      - match: "(補助率|上限額|対象費用)"
+        severity: "high"
+
+  # ---- テスト用ローカルファイル（差分テスト用） ----
+  - id: "test_local_before"
+    name: "テスト：差分デモ用（変更前）"
+    url: "file://tests/fixtures/before.html"
+    owner_team: "qa"
+    tags: ["test"]
+    fetch_interval_hours: 999
+    severity_rules:
+      - match: "(申請|締切|金額)"
+        severity: "high"
